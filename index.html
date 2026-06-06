@@ -110,7 +110,7 @@
     });
 
     // عند إرسال النموذج
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         let name = document.getElementById('name').value;
@@ -120,10 +120,19 @@
         
         let message = `مرحباً، أود حجز المسبح المرجو تأكيد الحجز:\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}\n📅 التاريخ: ${date}\n⏱️ الفترة: ${period}`;
         
-        // 🛑 تعديل هنا: ضع رقم هاتفك مع رمز الدولة (مثال: 9665xxxxxxxx)
+        // 🛑 تأكدي أن رقمك مكتوب هنا بدقة بالصيغة الدولية دون أصفار في البداية ودون علامة (+)
         let myPhoneNumber = "213699007131"; 
         
-        window.open(`https://wa.me{myPhoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+        // الرابط المباشر والأقوى لفتح التطبيق فوراً في الهواتف
+        let whatsappUrl = `whatsapp://send?phone=${myPhoneNumber}&text=${encodeURIComponent(message)}`;
+        
+        // محاولة فتح التطبيق مباشرة
+        window.location.href = whatsappUrl;
+        
+        // إذا كان المستخدم يفتح من الكمبيوتر ولم يعمل الرابط المباشر، نضع رابطاً بديلًا احتياطياً بعد ثانيتين
+        setTimeout(function() {
+            window.location.href = `https://whatsapp.com{myPhoneNumber}&text=${encodeURIComponent(message)}`;
+        }, 2000);
     });
 </script>
 
