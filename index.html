@@ -16,6 +16,10 @@
         .features { display: flex; justify-content: space-around; margin-bottom: 25px; background: #e2f1ff; padding: 10px; border-radius: 8px; font-size: 14px; }
         .error-msg { color: #d9534f; font-size: 14px; margin-top: 5px; display: none; font-weight: bold; }
         .booked-list { background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        
+        /* تصميم زر خرائط جوجل الجديد */
+        .btn-maps { width: 100%; background-color: #2ec4b6; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; display: inline-block; margin-bottom: 20px; transition: 0.3s; box-sizing: border-box; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .btn-maps:hover { background-color: #0f9f90; }
     </style>
 </head>
 <body>
@@ -23,6 +27,10 @@
 <div class="container">
     <h1>🏊‍♂️ مسبح العائلات فقط بالشرقية</h1>
     <p style="text-align: center; color: #666;">راحة، أمان، وخصوصية تامة لعائلتك</p>
+    
+    <!-- 📍 هنا تم إضافة زر الموقع الجغرافي المرتبط بـ Google Maps -->
+    <!-- 🛑 ملاحظة: استبدلي الرابط بالأسفل برابط موقع مسبحك الفعلي المنسوخ من تطبيق الخرائط -->
+    <a href="https://google.com" target="_blank" class="btn-maps">📍 اضغط هنا لفتح موقع المسبح على خرائط Google</a>
     
     <div class="features">
         <span>🔒 خصوصية 100%</span>
@@ -111,7 +119,7 @@
     });
 
     // عند إرسال النموذج
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
         let name = document.getElementById('name').value;
@@ -121,7 +129,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
         
         let message = `مرحباً، أود حجز المسبح المرجو تأكيد الحجز:\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}\n📅 التاريخ: ${date}\n⏱️ الفترة: ${period}`;
         
-        // 🛑 تأكدي أن رقمك مكتوب هنا بدقة بالصيغة الدولية دون أصفار في البداية ودون علامة (+)
+        // 🛑 رقم هاتفك الخاص بالصيغة الدولية التامة
         let myPhoneNumber = "213699007131"; 
         
         // الرابط المباشر والأقوى لفتح التطبيق فوراً في الهواتف
@@ -130,12 +138,15 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
         // محاولة فتح التطبيق مباشرة
         window.location.href = whatsappUrl;
         
-        // إذا كان المستخدم يفتح من الكمبيوتر ولم يعمل الرابط المباشر، نضع رابطاً بديلًا احتياطياً بعد ثانيتين
+        // الرابط البديل المصلح في حال لم يعمل الرابط المباشر على المتصفح أو الكمبيوتر
         setTimeout(function() {
-            window.location.href = `https://whatsapp.com{myPhoneNumber}&text=${encodeURIComponent(message)}`;
+            window.location.href = "https://wa.me" + myPhoneNumber + "?text=" + encodeURIComponent(message);
         }, 2000);
     });
 </script>
+
+</body>
+</html>
 
 </body>
 </html>
