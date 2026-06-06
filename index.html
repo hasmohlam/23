@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -16,8 +17,6 @@
         .features { display: flex; justify-content: space-around; margin-bottom: 25px; background: #e2f1ff; padding: 10px; border-radius: 8px; font-size: 14px; }
         .error-msg { color: #d9534f; font-size: 14px; margin-top: 5px; display: none; font-weight: bold; }
         .booked-list { background: #fff3cd; border: 1px solid #ffeeba; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        
-        /* تصميم زر خرائط جوجل المرتبط بإحداثياتك */
         .btn-maps { width: 100%; background-color: #2ec4b6; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; display: inline-block; margin-bottom: 20px; transition: 0.3s; box-sizing: border-box; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
         .btn-maps:hover { background-color: #0f9f90; }
     </style>
@@ -28,7 +27,6 @@
     <h1>🏊‍♂️ مسبح العائلات فقط بالشرقية</h1>
     <p style="text-align: center; color: #666;">راحة، أمان، وخصوصية تامة لعائلتك</p>
     
-    <!-- 📍 تم ربط الزر بإحداثيات موقع مسبحك الدقيقة مباشرة -->
     <a href="https://maps.app.goo.gl/77nPXamURym6D3nj7" target="_blank" class="btn-maps">📍 اضغط هنا لفتح موقع المسبح على خرائط Google</a>
     
     <div class="features">
@@ -37,11 +35,10 @@
         <span>👶 مساحة العشب الطبيعي للعب</span>
     </div>
 
-    <!-- قسم يعرض للزبون الأيام المحجوزة مسبقاً للعلم -->
     <div class="booked-list">
         <strong>⚠️ تنبيه:</strong> الأيام التالية ممتلئة تماماً وغير متاحة للحجز:
         <ul id="bookedDatesText" style="margin: 5px 0 0 0; padding-right: 20px;">
-            <!-- سيتم ملء الأيام تلقائياً من البرمجة بالأسفل -->
+            <!-- سيتم ملء الأيام تلقائياً من البرمجة -->
         </ul>
     </div>
 
@@ -84,64 +81,122 @@
 </div>
 
 <script>
-    // الأيام المحجوزة بصيغة (السنة-الشهر-اليوم) 
-    const bookedDates = [
-        "2026-06-11",
-        "2026-06-12", 
-        "2026-06-13", 
-        "2026-06-19",
-        "2026-06-25"
-    ];
+    // ========== التواريخ المحجوزة (تُقرأ من localStorage أو القائمة الافتراضية) ==========
+    let bookedDates = [];
 
-    // تفعيل المنع عند فتح الصفحة ومنع اختيار تواريخ قديمة
+    // دالة لتحديث واجهة عرض التواريخ المحجوزة
+    function updateBookedList() {
+        const listContainer = document.getElementById('bookedDatesText');
+        listContainer.innerHTML = ''; // مسح القائمة الحالية
+        if (bookedDates.length === 0) {
+            let li = document.createElement('li');
+            li.textContent = "لا توجد أيام محجوزة بعد.";
+            listContainer.appendChild(li);
+        } else {
+            bookedDates.forEach(date => {
+                let li = document.createElement('li');
+                li.textContent = date;
+                listContainer.appendChild(li);
+            });
+        }
+    }
+
+    // دالة لحفظ bookedDates في localStorage
+    function saveBookedDates() {
+        localStorage.setItem('swimmingPoolBookedDates', JSON.stringify(bookedDates));
+    }
+
+    // تحميل البيانات من localStorage عند بدء الصفحة
+    function loadBookedDates() {
+        const stored = localStorage.getItem('swimmingPoolBookedDates');
+        if (stored) {
+            bookedDates = JSON.parse(stored);
+        } else {
+            // القائمة الافتراضية (يمكنك تعديلها حسب حاجتك)
+            bookedDates = [
+                "2026-06-11",
+                "2026-06-12", 
+                "2026-06-13", 
+                "2026-06-19",
+                "2026-06-25"
+            ];
+            saveBookedDates(); // حفظها لأول مرة
+        }
+        updateBookedList();
+    }
+
+    // إضافة تاريخ جديد إلى القائمة السوداء
+    function addBookedDate(newDate) {
+        if (!bookedDates.includes(newDate)) {
+            bookedDates.push(newDate);
+            saveBookedDates();
+            updateBookedList();
+            return true;
+        }
+        return false;
+    }
+
+    // تفعيل المنع على حقل التاريخ
     const dateInput = document.getElementById('date');
     const today = new Date().toISOString().split('T')[0];
-    dateInput.min = today; // منع اختيار أيام مرت في الماضي
+    dateInput.min = today; // منع اختيار أيام ماضية
 
-    // عرض الأيام المحجوزة في القائمة العلوية للزبائن بشكل منظم
-    const listContainer = document.getElementById('bookedDatesText');
-    bookedDates.forEach(date => {
-        let li = document.createElement('li');
-        li.textContent = date;
-        listContainer.appendChild(li);
-    });
-
-    // فحص التاريخ عند اختياره من قبل الزبون
+    // التحقق من التاريخ عند كتابته أو اختياره
     dateInput.addEventListener('input', function() {
         const errorMsg = document.getElementById('dateError');
         if (bookedDates.includes(this.value)) {
             errorMsg.style.display = 'block';
-            this.value = ''; // مسح التاريخ الخاطئ فوراً
+            this.value = ''; // إفراغ الحقل
         } else {
             errorMsg.style.display = 'none';
         }
     });
 
-    // عند إرسال النموذج
+    // معالجة إرسال النموذج (تأكيد الحجز)
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        let name = document.getElementById('name').value;
-        let phone = document.getElementById('phone').value;
+
+        let name = document.getElementById('name').value.trim();
+        let phone = document.getElementById('phone').value.trim();
         let date = document.getElementById('date').value;
-        let period = document.getElementById('period').options[document.getElementById('period').selectedIndex].text;
-        
+        let periodSelect = document.getElementById('period');
+        let period = periodSelect.options[periodSelect.selectedIndex].text;
+
+        // التحقق من أن التاريخ غير محجوز (مرة أخرى كأمان)
+        if (bookedDates.includes(date)) {
+            document.getElementById('dateError').style.display = 'block';
+            dateInput.value = '';
+            return;
+        }
+
+        if (!name || !phone || !date || !periodSelect.value) {
+            alert("يرجى ملء جميع الحقول.");
+            return;
+        }
+
+        // ---------- إضافة التاريخ تلقائياً إلى قائمة التواريخ المحجوزة ----------
+        addBookedDate(date);
+
+        // الآن يمكن إرسال رسالة الواتساب
         let message = `مرحباً، أود حجز المسبح المرجو تأكيد الحجز:\n\n👤 الاسم: ${name}\n📞 الهاتف: ${phone}\n📅 التاريخ: ${date}\n⏱️ الفترة: ${period}`;
-        
-        // رقم هاتفك الخاص بالصيغة الدولية التامة
-        let myPhoneNumber = "213699007131"; 
-        
-        // الرابط المباشر والأقوى لفتح التطبيق فوراً في الهواتف
+        let myPhoneNumber = "213699007131";
         let whatsappUrl = `whatsapp://send?phone=${myPhoneNumber}&text=${encodeURIComponent(message)}`;
-        
-        // محاولة فتح التطبيق مباشرة
         window.location.href = whatsappUrl;
-        
-        // الرابط البديل المصلح في حال لم يعمل الرابط المباشر على المتصفح أو الكمبيوتر
+
         setTimeout(function() {
-            window.location.href = "https://wa.me" + myPhoneNumber + "?text=" + encodeURIComponent(message);
+            window.location.href = "https://wa.me/" + myPhoneNumber + "?text=" + encodeURIComponent(message);
         }, 2000);
+
+        // (اختياري) إعلام المستخدم بأن الحجز تم إضافته للقائمة السوداء
+        alert(`تم حجز التاريخ ${date} بنجاح، وتم إضافته إلى قائمة الأيام غير المتاحة.`);
+        
+        // إعادة تعيين الحقول (اختياري) دون مسح الحقول المهمة
+        document.getElementById('bookingForm').reset();
+        dateInput.value = '';
     });
+
+    // بدء التطبيق بتحميل التواريخ المخزنة
+    loadBookedDates();
 </script>
 
 </body>
